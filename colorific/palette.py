@@ -184,7 +184,7 @@ def extract_colors(
     color_count = 0
 
     for color in colors:
-        if color.prominence >= colors[0].prominence * min_prominence:
+        if color.prominence > colors[0].prominence * min_prominence:
             color_list.append(color)
             color_count += 1
 
@@ -200,6 +200,7 @@ def norm_color(c):
 
 
 def detect_background(im, colors, to_canonical):
+
     # more then half the image means background
     if colors[0].prominence >= config.BACKGROUND_PROMINENCE:
         return colors[1:], colors[0]
