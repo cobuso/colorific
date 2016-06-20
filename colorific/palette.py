@@ -144,8 +144,8 @@ def extract_colors(
     n_pixels = mul(*im.size)
 
     # aggregate colors
-    to_canonical = {config.WHITE: config.WHITE, config.BLACK: config.BLACK}
-    aggregated = Counter({config.WHITE: 0, config.BLACK: 0})
+    to_canonical = {config.BLACK: config.BLACK}
+    aggregated = Counter({config.BLACK: 0})
     sorted_cols = sorted(dist.items(), key=itemgetter(1), reverse=True)
     for c, n in sorted_cols:
         if c in aggregated:
