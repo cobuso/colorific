@@ -179,12 +179,12 @@ def extract_colors(
         # keep at least one color
         colors = colors[:1]
 
-    # keep any color within 10% of the majority color
+    # keep any color that hits the min prominence value
     color_list = []
     color_count = 0
 
     for color in colors:
-        if color.prominence > colors[0].prominence * min_prominence:
+        if color.prominence > min_prominence:
             color_list.append(color)
             color_count += 1
 
@@ -201,20 +201,30 @@ def norm_color(c):
 
 def detect_background(im, colors, to_canonical):
 
-    # more then half the image means background
-    if colors[0].prominence >= config.BACKGROUND_PROMINENCE:
-        return colors[1:], colors[0]
-
-    # work out the background color
+    # work out the background color - first, sample around the edges
     w, h = im.size
     points = [
         (0, 0), (0, h / 2), (0, h - 1), (w / 2, h - 1), (w - 1, h - 1),
         (w - 1, h / 2), (w - 1, 0), (w / 2, 0)]
     edge_dist = Counter(im.getpixel(p) for p in points)
 
+    # next, sample in the centre (40%, 40%)
+    points = [
+        (4 * w / 10.0, 4 * h / 10.0), 
+        (6 * w / 10.0, 4 * h / 10.0),
+        (4 * w / 10.0, 6 * h / 10.0),
+        (6 * w / 10.0, 6 * h / 10.0),
+    ]
+    centre_dist = Counter(im.getpixel(p) for p in points)
+
     (majority_col, majority_count), = edge_dist.most_common(1)
-    if majority_count >= 3:
-        # we have a background color
+    (centre_col, centre_count), = centre_dist.most_common(1)
+
+    min_distance = 5
+    if majority_count >= 3 and distance(centre_col, majority_col) > min_distance:
+        # we have a background color, but only if three of the sampled edge points
+        # are the same colour, and the edge points are sufficiently different from
+        # the central points
         canonical_bg = to_canonical[majority_col]
         bg_color, = [c for c in colors if c.value == canonical_bg]
         colors = [c for c in colors if c.value != canonical_bg]
@@ -226,7 +236,7 @@ def detect_background(im, colors, to_canonical):
 
 
 def print_colors(filename, palette):
-    colors = '%s\t%s\t%s' % (
+    colors = '%s\t%s\t (BG: %s)' % (
         filename, ','.join(rgb_to_hex(c.value) for c in palette.colors),
         palette.bgcolor and rgb_to_hex(palette.bgcolor.value) or '')
     print(colors)
