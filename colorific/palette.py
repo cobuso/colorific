@@ -203,17 +203,18 @@ def detect_background(im, colors, to_canonical):
 
     # work out the background color - first, sample around the edges
     w, h = im.size
+    width_from_edge = 10
     points = [
-        (0, 0), (0, h / 2), (0, h - 1), (w / 2, h - 1), (w - 1, h - 1),
-        (w - 1, h / 2), (w - 1, 0), (w / 2, 0)]
+        (width_from_edge, width_from_edge), (width_from_edge, h / 2), (width_from_edge, h - width_from_edge), (w / 2, h - width_from_edge), (w - width_from_edge, h - width_from_edge),
+        (w - width_from_edge, h / 2), (w - width_from_edge, 0), (w / 2, width_from_edge)]
     edge_dist = Counter(im.getpixel(p) for p in points)
 
     # next, sample in the centre (40%, 40%)
     points = [
-        (4 * w / 10.0, 4 * h / 10.0), 
-        (6 * w / 10.0, 4 * h / 10.0),
-        (4 * w / 10.0, 6 * h / 10.0),
-        (6 * w / 10.0, 6 * h / 10.0),
+        (4.5 * w / 10.0, 4.5 * h / 10.0), 
+        (5.5 * w / 10.0, 4.5 * h / 10.0),
+        (4.5 * w / 10.0, 5.5 * h / 10.0),
+        (5.5 * w / 10.0, 5.5 * h / 10.0),
     ]
     centre_dist = Counter(im.getpixel(p) for p in points)
 
@@ -267,7 +268,7 @@ def save_palette_as_image(filename, palette):
 
 
 def meets_min_saturation(c, threshold):
-    return colorsys.rgb_to_hsv(*norm_color(c.value))[1] > threshold
+    return colorsys.rgb_to_hsv(*norm_color(c.value))[1] >= threshold
 
 
 def autocrop(im, bgcolor):
