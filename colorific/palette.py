@@ -131,7 +131,11 @@ def extract_colors(
     if Image.isImageType(filename_or_img):
         im = filename_or_img
     else:
-        im = Image.open(filename_or_img)
+        temp_image = Image.open(filename_or_img)
+        # Workaround for "Too many open files" issue in Pillow
+        # see https://github.com/python-pillow/Pillow/issues/1237
+        im = temp_image.copy()
+        temp_image.close()
 
     # get point color count
     if im.mode != 'RGB':
