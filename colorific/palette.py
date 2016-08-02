@@ -190,7 +190,7 @@ def extract_colors(
 
     for color in colors:
 
-        similar_to_bg = (distance(color.value, bg_color.value) < min_distance)
+        similar_to_bg = bg_color and (distance(color.value, bg_color.value) < min_distance)
         if color.prominence > min_prominence and not similar_to_bg:
             color_list.append(color)
             color_count += 1
