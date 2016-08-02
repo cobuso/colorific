@@ -187,10 +187,11 @@ def extract_colors(
     # only colours sufficiently different from the background color will be kept
     color_list = []
     color_count = 0
+    min_distance_to_bg = 2
 
     for color in colors:
 
-        similar_to_bg = bg_color and (distance(color.value, bg_color.value) < min_distance)
+        similar_to_bg = bg_color and (distance(color.value, bg_color.value) < min_distance_to_bg)
         if color.prominence > min_prominence and not similar_to_bg:
             color_list.append(color)
             color_count += 1
@@ -213,10 +214,8 @@ def detect_background(im, colors, to_canonical):
     w, h = im.size
     width_from_edge = 10
     points = [
-        (width_from_edge, width_from_edge), (width_from_edge, h / 2),
-        (width_from_edge, h - width_from_edge), (w / 2, h - width_from_edge),
-        (w - width_from_edge, h - width_from_edge), (w - width_from_edge, h / 2),
-        (w - width_from_edge, 0), (w / 2, width_from_edge)
+        (width_from_edge, width_from_edge), (width_from_edge, h - width_from_edge),
+        (w - width_from_edge, h - width_from_edge), (w - width_from_edge, 0),
     ]
     edge_dist = Counter(im.getpixel(p) for p in points)
 
