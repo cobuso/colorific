@@ -184,11 +184,14 @@ def extract_colors(
         colors = colors[:1]
 
     # keep any color that hits the min prominence value
+    # only colours sufficiently different from the background color will be kept
     color_list = []
     color_count = 0
 
     for color in colors:
-        if color.prominence > min_prominence:
+
+        similar_to_bg = (distance(color.value, bg_color.value) < min_distance)
+        if color.prominence > min_prominence and not similar_to_bg:
             color_list.append(color)
             color_count += 1
 
@@ -205,13 +208,36 @@ def norm_color(c):
 
 def detect_background(im, colors, to_canonical):
 
+
     # work out the background color - first, sample around the edges
     w, h = im.size
     width_from_edge = 10
     points = [
-        (width_from_edge, width_from_edge), (width_from_edge, h / 2), (width_from_edge, h - width_from_edge), (w / 2, h - width_from_edge), (w - width_from_edge, h - width_from_edge),
-        (w - width_from_edge, h / 2), (w - width_from_edge, 0), (w / 2, width_from_edge)]
+        (width_from_edge, width_from_edge), (width_from_edge, h / 2),
+        (width_from_edge, h - width_from_edge), (w / 2, h - width_from_edge),
+        (w - width_from_edge, h - width_from_edge), (w - width_from_edge, h / 2),
+        (w - width_from_edge, 0), (w / 2, width_from_edge)
+    ]
     edge_dist = Counter(im.getpixel(p) for p in points)
+
+    # aggregate background colours, to ensure that background is respected even if it's slightly inconsistent
+    min_bg_distance = 5.0
+    aggregated = Counter()
+    for c, n in edge_dist.items():
+        if c in aggregated:
+            aggregated[c] += n
+        else:
+            if len(aggregated) > 0:
+                d, nearest = min((distance(c, alt), alt) for alt in aggregated)
+                if d < min_bg_distance:
+                    # close match
+                    aggregated[nearest] += n
+                else:
+                    # no close match
+                    aggregated[c] = n
+            else:
+                aggregated[c] = n
+
 
     # next, sample in the centre (40%, 40%)
     points = [
@@ -222,7 +248,7 @@ def detect_background(im, colors, to_canonical):
     ]
     centre_dist = Counter(im.getpixel(p) for p in points)
 
-    (majority_col, majority_count), = edge_dist.most_common(1)
+    (majority_col, majority_count), = aggregated.most_common(1)
     (centre_col, centre_count), = centre_dist.most_common(1)
 
     min_distance = 5
