@@ -1,3 +1,6 @@
+NOTE: This has been modified to deal with a specific set of images. Not
+for general use.
+
 colorific
 =========
 
