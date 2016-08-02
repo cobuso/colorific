@@ -212,7 +212,7 @@ def detect_background(im, colors, to_canonical):
 
     # work out the background color - first, sample around the edges
     w, h = im.size
-    width_from_edge = 10
+    width_from_edge = 15
     points = [
         (width_from_edge, width_from_edge), (width_from_edge, h - width_from_edge),
         (w - width_from_edge, h - width_from_edge), (w - width_from_edge, 0),
