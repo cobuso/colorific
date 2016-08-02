@@ -250,7 +250,7 @@ def detect_background(im, colors, to_canonical):
     (majority_col, majority_count), = aggregated.most_common(1)
     (centre_col, centre_count), = centre_dist.most_common(1)
 
-    min_distance = 7
+    min_distance = 8
     if majority_count >= 3 and distance(centre_col, majority_col) > min_distance:
         # we have a background color, but only if three of the sampled edge points
         # are the same colour, and the edge points are sufficiently different from
